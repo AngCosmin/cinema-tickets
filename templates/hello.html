@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>eGovCinema</title>
+    <link href="https://fonts.googleapis.com/css?family=Nunito:200,600" rel="stylesheet" type="text/css">
+    <link rel="stylesheet" href="/static/css/seats.css"/>
+    <link href="/static/css/bootstrap.min.css" rel="stylesheet" type="text/css">
+    <style>
+        html, body {
+            background-color: #fff;
+            color: #636b6f;
+            font-family: 'Nunito', sans-serif;
+            font-weight: 200;
+            height: 100vh;
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+<div id="app" class="container">
+    <div class="screen col-sm-12 col-md-8 offset-md-2 col-lg-6 offset-lg-3"></div>
+
+    <div class="theatre">
+        <div class="cinema-seats left">
+            <div v-for="column in columns.left" class="cinema-row">
+                <div v-for="row in rows.left" class="seat" @click="toggleActive" :data-column="column"
+                     :data-row="row"></div>
+            </div>
+        </div>
+
+        <div class="cinema-seats right">
+            <div v-for="column in columns.right" class="cinema-row">
+                <div v-for="row in rows.right" class="seat" @click="toggleActive" :data-column="columns.left + column"
+                     :data-row="row"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-2 offset-md-5 mt-2">
+        <div v-if="numberOfSeatsSelected > 0" class="btn btn-warning btn-sm btn-block" data-toggle="modal"
+             data-target="#modalBuyTickets" @click="initializePersons">
+
+            <span v-if="numberOfSeatsSelected == 1">Cumpara un bilet</span>
+            <span v-else-if="numberOfSeatsSelected > 1">Cumpara [[ numberOfSeatsSelected ]] bilete</span>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal fade" id="modalBuyTickets" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <form action="{{ url_for('buy') }}" method="POST">
+
+
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLongTitle">Cumparare bilete</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+
+                    <div class="modal-body">
+                        <template v-if="numberOfSeatsSelected > 0" v-for="(seat, index) in selectedSeats">
+                            <h5 class="text-center">Randul [[ seat.row ]] Coloana [[ seat.column ]]</h5>
+
+                            <input type="hidden" :name="'person[' + index + '][row]'" :value="seat.row">
+                            <input type="hidden" :name="'person[' + index + '][column]'" :value="seat.column">
+
+                            <div class="col-md-12 mb-1">
+                                <label for="name"></label>
+                                <input type="text" class="form-control" :name="'person[' + index + '][name]'"
+                                       id="name" placeholder="Nume" v-model="persons[index].name"
+                                       :class="isValidName(persons[index].name) ? '' : 'is-invalid'" required>
+
+                                <div class="invalid-feedback">
+                                    Numele trebuie sa aiba intre 3 si 30 caractere.
+                                </div>
+                            </div>
+
+                            <div class="col-md-12 mb-1">
+                                <label for="cnp"></label>
+                                <input type="text" class="form-control" :name="'person[' + index + '][cnp]'"
+                                       id="name" placeholder="CNP" v-model="persons[index].cnp"
+                                       :class="isValidCNP(persons[index].cnp) ? '' : 'is-invalid'" required>
+
+                                <div class="invalid-feedback">
+                                    CNP invalid
+                                </div>
+                            </div>
+
+                            <div class="col-md-12 mb-1">
+                                <label for="cnp"></label>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" v-model="persons[index].ticket_type"
+                                           :name="'person[' + index + '][ticket_type]'" id="ticketAdult" value="adult">
+                                    <label class="form-check-label" for="ticketAdult">Adult</label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" v-model="persons[index].ticket_type"
+                                           :name="'person[' + index + '][ticket_type]'" id="ticketStudent" value="student">
+                                    <label class="form-check-label" for="ticketStudent">Student</label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" v-model="persons[index].ticket_type"
+                                           :name="'person[' + index + '][ticket_type]'" id="ticketElev" value="elev">
+                                    <label class="form-check-label" for="ticketElev">Elev</label>
+                                </div>
+                            </div>
+
+                            <template v-if="persons[index].ticket_type === 'student'">
+                                <div class="col-md-12 mb-1">
+                                    <label for="series"></label>
+                                    <input type="text" class="form-control" :name="'person[' + index + '][series]'"
+                                           id="series" placeholder="Serie legitimatie" v-model="persons[index].series" required>
+                                </div>
+                            </template>
+                            <span v-if="persons[index].ticket_type === 'elev'">
+                                <div class="col-md-12 mb-1">
+                                    <label for="matricol"></label>
+                                    <input type="text" class="form-control" :name="'person[' + index + '][matricol]'"
+                                           id="matricol" placeholder="Numar matricol" v-model="persons[index].matricol" required>
+                                </div>
+                            </span>
+                            <hr/>
+                        </template>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Inchide</button>
+                        <button type="submit" class="btn btn-success">Cumpara</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+
+<script src="/static/js/jquery-3.2.1.slim.min.js"></script>
+<script src="/static/js/bootstrap.min.js"></script>
+<script src="/static/js/vue.js"></script>
+<script>
+    var app = new Vue({
+        el: '#app',
+        delimiters: ['[[', ']]'],
+        data: {
+            numberOfSeatsSelected: 0,
+            selectedSeats: [],
+            rows: {left: 7, right: 7},
+            columns: {left: 7, right: 7},
+            persons: [],
+        },
+        methods: {
+            toggleActive(event) {
+                let element = event.target;
+                element.classList.toggle('active');
+
+                if (element.classList.contains('active')) {
+                    this.numberOfSeatsSelected++;
+                    this.selectedSeats.push({row: element.dataset.row, column: element.dataset.column});
+                }
+                else {
+                    this.numberOfSeatsSelected--;
+                    let index = this.selectedSeats.indexOf({row: element.dataset.row, column: element.dataset.column});
+                    this.selectedSeats.splice(index, 1);
+                }
+
+                this.initializePersons();
+            },
+            initializePersons() {
+                this.persons = [];
+
+                for (let i = 0; i < this.numberOfSeatsSelected; i++) {
+                    this.persons.push({
+                        name: '',
+                        ticket_type: '',
+                        cnp: '',
+                        matricol: null,
+                        series: null,
+                        price: 0
+                    })
+                }
+            },
+            isValidName(name) {
+                return name.length >= 3 && name.length <= 30
+            },
+            isValidCNP(cnp) {
+                return cnp.length === 13 && (cnp.startsWith('1') || cnp.startsWith('2'))
+            }
+        }
+    });
+</script>
+</html>
