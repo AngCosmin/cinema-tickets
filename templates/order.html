@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>eGovCinema</title>
+    <link href="/static/css/ticket.css" rel="stylesheet"/>
+    <style>
+        html, body {
+            background-color: #fff;
+            color: #636b6f;
+            font-family: 'Nunito', sans-serif;
+            font-weight: 200;
+            height: 100vh;
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+<div id="app" class="container">
+    {% for value in tickets %}
+        <div class="cardWrap">
+            <div class="card cardLeft">
+                <h1>eGov <span>Cinema</span></h1>
+                <div class="title">
+                    <h2>Hotel Transylvania 3 (12:00)</h2>
+                    <span>movie</span>
+                </div>
+                <div class="name">
+                    <h2>{{ value['name'] }}</h2>
+                    <span>name</span>
+                </div>
+                <div class="seat">
+                    <h2>{{ value['cnp'] }}</h2>
+                    <span>cnp</span>
+                </div>
+                <div class="time">
+                    <h2>{{ value['ticket_type'] }}</h2>
+                    <span>type</span>
+                </div>
+                <div class="time">
+                    <h2>{{ value['details'] }}</h2>
+                    <span>details</span>
+                </div>
+
+            </div>
+            <div class="card cardRight">
+                <div class="eye"></div>
+                <div class="number">
+                    <h3>R{{ value['row'] }} C{{ value['col'] }}</h3>
+                    <span>seat</span>
+                </div>
+                <div class="barcode"></div>
+            </div>
+        </div>
+    {% endfor %}
+</div>
+</body>
+
+<script src="/static/js/jquery-3.2.1.slim.min.js"></script>
+<script src="/static/js/bootstrap.min.js"></script>
+<script src="/static/js/vue.js"></script>
+<script src="/static/js/axios.min.js"></script>
+<script>
+    var app = new Vue({
+        el: '#app',
+        delimiters: ['[[', ']]'],
+        data: {},
+    });
+</script>
+</html>
+</html>

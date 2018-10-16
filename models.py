@@ -1,4 +1,4 @@
-from peewee import Model, MySQLDatabase, CharField, DateTimeField, ForeignKeyField
+from peewee import MySQLDatabase, Model, CharField, IntegerField
 
 MYSQL_DB = 'cinema'
 MYSQL_HOST = 'localhost'
@@ -15,10 +15,11 @@ class BaseModel(Model):
         database = db
 
 
-class Movie(BaseModel):
-    title = CharField()
-    start_time = DateTimeField()
-
-
-class Tickes(BaseModel):
-    movie_id = ForeignKeyField(Movie, backref='movie')
+class Tickets(BaseModel):
+    name = CharField(50)
+    ticket_type = CharField(10)
+    cnp = CharField(15)
+    details = CharField(15)
+    row = IntegerField()
+    col = IntegerField()
+    order_id = IntegerField()

@@ -10,7 +10,7 @@
   background: black;
   height: 200px;
   margin-top: 30px;
-  background: url(https://i.ytimg.com/vi/PW_UcuOwgnQ/maxresdefault.jpg) no-repeat 50%;
+  background: url('/static/img/movie.jpg') no-repeat 50%;
   background-size: cover;
 }
 
