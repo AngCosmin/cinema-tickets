@@ -3,6 +3,7 @@ import random
 import pdfkit
 
 from flask import Flask, render_template, request, jsonify, make_response, send_from_directory
+from peewee import fn
 from playhouse.shortcuts import model_to_dict
 
 from models import Tickets
@@ -17,6 +18,46 @@ def index():
     return render_template('index.html')
 
 
+@app.route('/stats')
+def stats():
+    return render_template('stats.html')
+
+
+@app.route('/get-stats', methods=['GET'])
+def get_stats():
+    stats = {
+        'ticket_type_distribution': {
+            'adult': 0,
+            'student': 0,
+        },
+        'location_distribution': [],
+        'users_distribution': [],
+        'movies_distribution': [],
+    }
+
+    # Get ticket type
+    tickets = Tickets.select(Tickets.ticket_type, fn.COUNT(Tickets.ticket_type).alias('count')).group_by(Tickets.ticket_type)
+    for ticket in tickets:
+        stats['ticket_type_distribution'][ticket.ticket_type] = ticket.count
+
+    # Location distribution
+    tickets = Tickets.select(Tickets.row, Tickets.col, fn.COUNT(Tickets.id).alias('count')).group_by(Tickets.row, Tickets.col)
+    tickets = [{'row': ticket.row, 'col': ticket.col, 'count': ticket.count} for ticket in tickets]
+    stats['location_distribution'] = tickets
+
+    # Users distribution
+    tickets = Tickets.select(Tickets.name, fn.COUNT(Tickets.id).alias('count')).group_by(Tickets.cnp)
+    tickets = [{'name': ticket.name, 'count': ticket.count} for ticket in tickets]
+    stats['users_distribution'] = tickets
+
+    # Movies distribution
+    tickets = Tickets.select(Tickets.movies_id, fn.COUNT(Tickets.id).alias('count')).group_by(Tickets.movies_id)
+    tickets = [{'name': ticket.movies_id.title, 'count': ticket.count} for ticket in tickets]
+    stats['movies_distribution'] = tickets
+
+    return jsonify(stats)
+
+
 @app.route('/order/<int:order_id>')
 def show_order(order_id):
     tickets = Tickets.select().where(Tickets.order_id == order_id)
@@ -26,7 +67,6 @@ def show_order(order_id):
 
 @app.route('/print/<int:order_id>')
 def print_order(order_id):
-    print('Test')
     return send_from_directory('orders/', str(order_id) + '.pdf')
 
 
