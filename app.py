@@ -43,6 +43,12 @@ def buy():
     order_id = random.randrange(100000000, 999999999)
 
     for person in data:
+        if person['ticket_type'] == 'student' or person['ticket_type'] == 'elev':
+            if not person['details']:
+                return jsonify({
+                    'success': False
+                })
+
         Tickets.insert(
             name=person['name'],
             ticket_type=person['ticket_type'],
