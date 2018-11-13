@@ -18,7 +18,21 @@
 </head>
 <body>
 <div id="app" class="container">
-    <ve-line :data="chartData" :toolbox="toolbox"></ve-line>
+    <h2 class="ml-3">Ticket distribution</h2>
+    <ve-pie :data="ticketDistribution" :toolbox="toolboxSave"></ve-pie>
+    <hr>
+
+    <h2 class="text-center">User distribution</h2>
+    <ve-ring :data="userDistribution" :toolbox="toolboxSave"></ve-ring>
+    <hr>
+
+    <h2 class="text-center">Location distribution</h2>
+    <ve-histogram :data="locationDistribution" :toolbox="toolboxConvertAndSave"></ve-histogram>
+    <hr>
+
+    <h2 class="text-center">Movie distribution</h2>
+    <ve-bar :data="movieDistribution" :toolbox="toolboxConvertAndSave"></ve-bar>
+    <hr>
 </div>
 </body>
 
@@ -35,18 +49,32 @@
         delimiters: ['[[', ']]'],
         data: function () {
             return {
-                chartData: {
-                    columns: ['date', 'sales'],
+                ticketDistribution: {
+                    columns: ['type', 'count'],
                     rows: [
-                        {'date': '1月1日', 'sales': 123},
-                        {'date': '1月2日', 'sales': 1223},
-                        {'date': '1月3日', 'sales': 2123},
-                        {'date': '1月4日', 'sales': 4123},
-                        {'date': '1月5日', 'sales': 3123},
-                        {'date': '1月6日', 'sales': 7123}
+                        {'type': 'Student', 'count': 0},
+                        {'type': 'Adult', 'count': 0},
                     ]
                 },
-                toolbox: {
+                locationDistribution: {
+                    columns: ['location', 'count'],
+                    rows: [
+                        {'location': 'R1 C6', 'count': 0},
+                    ]
+                },
+                userDistribution: {
+                    columns: ['user', 'count'],
+                    rows: [
+                        {'user': 'Cosmin', 'count': 0},
+                    ]
+                },
+                movieDistribution: {
+                    columns: ['movie', 'count'],
+                    rows: [
+                        {'movie': 'Coboram la prima', 'count': 0},
+                    ]
+                },
+                toolboxConvertAndSave: {
                     feature: {
                         magicType: {
                             type: ['line', 'bar'],
@@ -59,7 +87,50 @@
                             title: 'Save'
                         }
                     }
+                },
+                toolboxSave: {
+                    feature: {
+                        saveAsImage: {
+                            title: 'Save'
+                        }
+                    }
                 }
+            }
+        },
+        created() {
+            this.getData()
+        },
+        methods: {
+            getData() {
+                axios.get('/get-stats').then((response) => {
+                    console.log(response)
+                    this.ticketDistribution.rows[0].count = response.data.ticket_type_distribution.student
+                    this.ticketDistribution.rows[1].count = response.data.ticket_type_distribution.adult
+
+                    this.locationDistribution.rows = []
+                    for (let location of response.data.location_distribution) {
+                        this.locationDistribution.rows.push({
+                            location: 'C' + location.col + ' R' + location.row,
+                            count: location.count,
+                        })
+                    }
+
+                    this.movieDistribution.rows = []
+                    for (let movie of response.data.movies_distribution) {
+                        this.movieDistribution.rows.push({
+                            movie: movie.name,
+                            count: movie.count,
+                        })
+                    }
+
+                    this.userDistribution.rows = []
+                    for (let user of response.data.users_distribution) {
+                        this.userDistribution.rows.push({
+                            user: user.name,
+                            count: user.count,
+                        })
+                    }
+                })
             }
         }
     });
