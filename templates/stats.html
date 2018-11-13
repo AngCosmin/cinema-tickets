@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>eGovCinema</title>
+    <link href="/static/css/ticket.css" rel="stylesheet"/>
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/v-charts/lib/style.min.css">
+    <style>
+        html, body {
+            background-color: #fff;
+            color: #636b6f;
+            font-family: 'Nunito', sans-serif;
+            font-weight: 200;
+            height: 100vh;
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+<div id="app" class="container">
+    <ve-line :data="chartData" :toolbox="toolbox"></ve-line>
+</div>
+</body>
+
+<script src="/static/js/jquery-3.2.1.slim.min.js"></script>
+<script src="/static/js/bootstrap.min.js"></script>
+<script src="/static/js/vue.js"></script>
+<script src="/static/js/axios.min.js"></script>
+<script src="//cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<script src="//cdn.jsdelivr.net/npm/echarts/dist/echarts.min.js"></script>
+<script src="//cdn.jsdelivr.net/npm/v-charts/lib/index.min.js"></script>
+<script>
+    var app = new Vue({
+        el: '#app',
+        delimiters: ['[[', ']]'],
+        data: function () {
+            return {
+                chartData: {
+                    columns: ['date', 'sales'],
+                    rows: [
+                        {'date': '1月1日', 'sales': 123},
+                        {'date': '1月2日', 'sales': 1223},
+                        {'date': '1月3日', 'sales': 2123},
+                        {'date': '1月4日', 'sales': 4123},
+                        {'date': '1月5日', 'sales': 3123},
+                        {'date': '1月6日', 'sales': 7123}
+                    ]
+                },
+                toolbox: {
+                    feature: {
+                        magicType: {
+                            type: ['line', 'bar'],
+                            title: {
+                                line: 'Convert to line',
+                                bar: 'Convert to bar',
+                            }
+                        },
+                        saveAsImage: {
+                            title: 'Save'
+                        }
+                    }
+                }
+            }
+        }
+    });
+</script>
+</html>
+</html>

@@ -17,6 +17,11 @@ def index():
     return render_template('index.html')
 
 
+@app.route('/stats')
+def stats():
+    return render_template('stats.html')
+
+
 @app.route('/order/<int:order_id>')
 def show_order(order_id):
     tickets = Tickets.select().where(Tickets.order_id == order_id)
@@ -26,7 +31,6 @@ def show_order(order_id):
 
 @app.route('/print/<int:order_id>')
 def print_order(order_id):
-    print('Test')
     return send_from_directory('orders/', str(order_id) + '.pdf')
 
 
@@ -43,6 +47,12 @@ def buy():
     order_id = random.randrange(100000000, 999999999)
 
     for person in data:
+        if person['ticket_type'] == 'student' or person['ticket_type'] == 'elev':
+            if not person['details']:
+                return jsonify({
+                    'success': False
+                })
+
         Tickets.insert(
             name=person['name'],
             ticket_type=person['ticket_type'],

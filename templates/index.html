@@ -163,6 +163,7 @@
             persons: [],
             orderId: '',
             afterPurchase: false,
+            adultPrice: 23,
         },
         computed: {
             totalPrice() {
@@ -188,10 +189,10 @@
                 handler: function(newValue) {
                     for (let person of this.persons) {
                         if (person.ticket_type === 'adult') {
-                            person.price = 23
+                            person.price = this.adultPrice
                         }
                         else if (person.ticket_type === 'student' || person.ticket_type === 'elev') {
-                            person.price = 17
+                            person.price = 30 / 100 * this.adultPrice
                         }
                     }
                 },
@@ -241,14 +242,15 @@
                 let that = this
 
                 axios.post('/buy', this.persons).then(function (response) {
-                    let success = response.data.success;
-                    if (success === true) {
-                        console.log(response.data.order_id)
-                        that.orderId = response.data.order_id
-                        console.log(that.orderId)
+                    let success = response.data.success
 
+                    if (success === true) {
+                        that.orderId = response.data.order_id
                         that.numberOfSeatsSelected = 0
                         that.afterPurchase = true
+                    }
+                    else {
+                        console.log(response.data.message)
                     }
                 })
             }
